@@ -32,7 +32,7 @@ Lombok.
 | API Gateway | **done** (Step 4) | routing, auth enforcement, rate limiting |
 | Auth Service | **done** (Step 5) | identity, JWT, RBAC, OAuth2 (`auth_db`) |
 | Employee Service | **done** (Step 6) | employee data (`employee_db`) |
-| Department Service | planned (Step 7) | org structure (`department_db`) |
+| Department Service | **done** (Step 7) | org structure (`department_db`) |
 | Notification Service | planned (Step 14) | email/SMS on domain events |
 
 Each service is independently deployable, owns its own database, and

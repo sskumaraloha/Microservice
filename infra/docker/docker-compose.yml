@@ -2,7 +2,6 @@
 # This file grows one block at a time as each course step adds a service or
 # a piece of infrastructure.
 #
-# Step 7  will add: mysql-department
 # Step 9  will add: kafka, zookeeper
 # Step 10 will add: redis
 # Step 11 will add: zipkin
@@ -22,6 +21,7 @@ volumes:
   mysql-auth-data:
   mysql-employee-data:
   employee-documents-data:
+  mysql-department-data:
 
 services:
   discovery-server:
@@ -197,6 +197,58 @@ services:
       - ems-network
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  mysql-department:
+    image: mysql:8.0.36
+    container_name: ems-mysql-department
+    environment:
+      MYSQL_DATABASE: department_db
+      MYSQL_USER: department_service
+      MYSQL_PASSWORD: ${DEPARTMENT_DB_PASSWORD:-change-me-in-production}
+      MYSQL_ROOT_PASSWORD: ${DEPARTMENT_DB_ROOT_PASSWORD:-change-me-in-production}
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql-department-data:/var/lib/mysql
+    networks:
+      - ems-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DEPARTMENT_DB_ROOT_PASSWORD:-change-me-in-production}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  department-service:
+    build:
+      context: ../..
+      dockerfile: department-service/Dockerfile
+    container_name: ems-department-service
+    ports:
+      - "8082:8082"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      CONFIG_SERVER_USERNAME: ${CONFIG_SERVER_USERNAME:-config-admin}
+      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD:-change-me-in-production}
+      EUREKA_USERNAME: ${EUREKA_SERVER_USERNAME:-eureka-admin}
+      EUREKA_PASSWORD: ${EUREKA_SERVER_PASSWORD:-change-me-in-production}
+      EUREKA_HOST: discovery-server
+      DB_HOST: mysql-department
+      DB_USERNAME: department_service
+      DB_PASSWORD: ${DEPARTMENT_DB_PASSWORD:-change-me-in-production}
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql-department:
+        condition: service_healthy
+    networks:
+      - ems-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/actuator/health"]
       interval: 30s
       timeout: 5s
       retries: 3

@@ -33,7 +33,8 @@ done, in progress, or upcoming.
       (`docs/architecture/05-auth-service.md`)
 - [x] **Step 6 — Employee Service (CRUD, search, pagination, documents)**
       (`docs/architecture/06-employee-service.md`)
-- [ ] Step 7 — Department Service (hierarchy, statistics, employee assignment)
+- [x] **Step 7 — Department Service (hierarchy, statistics, employee assignment)**
+      (`docs/architecture/07-department-service.md`)
 
 ## Phase 3 — Cross-Cutting Concerns
 
@@ -72,4 +73,4 @@ done, in progress, or upcoming.
 
 ---
 
-**Current status:** Step 6 complete. Proceeding to Step 7 (Department Service).
+**Current status:** Step 7 complete. Proceeding to Step 8 (Inter-service communication: OpenFeign, WebClient, Resilience4j).
