@@ -2,7 +2,6 @@
 # This file grows one block at a time as each course step adds a service or
 # a piece of infrastructure.
 #
-# Step 4  will add: api-gateway
 # Step 5  will add: auth-service, mysql-auth
 # Step 6  will add: mysql-employee
 # Step 7  will add: mysql-department
@@ -62,6 +61,32 @@ services:
       - ems-network
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  api-gateway:
+    build:
+      context: ../..
+      dockerfile: api-gateway/Dockerfile
+    container_name: ems-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      CONFIG_SERVER_USERNAME: ${CONFIG_SERVER_USERNAME:-config-admin}
+      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD:-change-me-in-production}
+      EUREKA_USERNAME: ${EUREKA_SERVER_USERNAME:-eureka-admin}
+      EUREKA_PASSWORD: ${EUREKA_SERVER_PASSWORD:-change-me-in-production}
+      EUREKA_HOST: discovery-server
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - ems-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 5s
       retries: 3

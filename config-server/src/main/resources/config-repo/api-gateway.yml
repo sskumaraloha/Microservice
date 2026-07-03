@@ -2,3 +2,50 @@
 
 server:
   port: 8080
+
+spring:
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 3000
+        response-timeout: 5s
+      routes:
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/api/v1/auth/**
+        - id: employee-service
+          uri: lb://EMPLOYEE-SERVICE
+          predicates:
+            - Path=/api/v1/employees/**
+        - id: department-service
+          uri: lb://DEPARTMENT-SERVICE
+          predicates:
+            - Path=/api/v1/departments/**
+
+gateway:
+  rate-limit:
+    limit-for-period: 20
+    refresh-period: 1s
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+
+security:
+  jwt:
+    # Login/register/refresh can't require a token the caller doesn't have
+    # yet. Note actuator endpoints are NOT listed here: they never pass
+    # through the Gateway's filter chain at all (see
+    # JwtAuthenticationGlobalFilter's Javadoc), so a pattern here would be
+    # meaningless for them.
+    public-paths:
+      - /api/v1/auth/register
+      - /api/v1/auth/login
+      - /api/v1/auth/refresh

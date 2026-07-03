@@ -1,0 +1,36 @@
+# =============================================================================
+# API Gateway's OWN bootstrap configuration — just enough to reach the
+# Config Server and Eureka. Routes, JWT public paths, CORS, and rate-limit
+# settings are business config and live in config-repo/api-gateway.yml on
+# the Config Server (see Step 3), not here.
+# =============================================================================
+
+spring:
+  application:
+    name: api-gateway
+  config:
+    # "optional:" means a Config Server outage doesn't crash startup — the
+    # gateway falls back to whatever is defined locally (nothing critical
+    # here) and logs a warning. In production you would instead want this
+    # to be a hard failure; the trade-off is documented in the Step 4 lesson.
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
+  cloud:
+    config:
+      username: ${CONFIG_SERVER_USERNAME:config-admin}
+      password: ${CONFIG_SERVER_PASSWORD:change-me-in-production}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USERNAME:eureka-admin}:${EUREKA_PASSWORD:change-me-in-production}@${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: when-authorized

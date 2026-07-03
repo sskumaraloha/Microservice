@@ -3,6 +3,15 @@
 # (e.g. employee-service.yml) can override any of these values, and
 # per-service-per-profile files (e.g. employee-service-docker.yml) take
 # precedence over both.
+#
+# `security.jwt.secret` lives here (not in auth-service.yml) because both
+# auth-service (signs tokens, Step 5) and api-gateway (verifies tokens,
+# Step 4) must use the exact same signing key. It is encrypted at rest —
+# see docs/architecture/03-config-server.md for how {cipher} values work.
+
+security:
+  jwt:
+    secret: '{cipher}63d72dc3ebe8e624aef67257d7e20dc165ce6787e11dc780659c13e66e4d4910591fe7affd1bb99824bbbee8774d0f41ef6b5550020fd723d7ee89d022c75a39f94f8bec5aae5f427b56a17009dced7cf06ef647e86e344c3597fd2a6eefda85'
 
 management:
   endpoints:

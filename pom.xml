@@ -29,12 +29,12 @@
         <lombok.version>1.18.34</lombok.version>
         <mapstruct.version>1.6.2</mapstruct.version>
         <testcontainers.version>1.20.2</testcontainers.version>
+        <jjwt.version>0.12.7</jjwt.version>
+        <resilience4j.version>2.2.0</resilience4j.version>
     </properties>
 
     <!--
         Each course step adds exactly one module here, e.g.:
-            <module>config-server</module>
-            <module>api-gateway</module>
             <module>auth-service</module>
             <module>employee-service</module>
             <module>department-service</module>
@@ -42,6 +42,7 @@
     <modules>
         <module>discovery-server</module>
         <module>config-server</module>
+        <module>api-gateway</module>
     </modules>
 
     <dependencyManagement>
@@ -64,6 +65,20 @@
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
                 <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-bom</artifactId>
+                <version>${jjwt.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-bom</artifactId>
+                <version>${resilience4j.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -24,7 +24,8 @@ done, in progress, or upcoming.
       (`docs/architecture/02-discovery-server.md`)
 - [x] **Step 3 — Config Server (centralized configuration)**
       (`docs/architecture/03-config-server.md`)
-- [ ] Step 4 — API Gateway (Spring Cloud Gateway, routing, rate limiting)
+- [x] **Step 4 — API Gateway (Spring Cloud Gateway, routing, rate limiting)**
+      (`docs/architecture/04-api-gateway.md`)
 
 ## Phase 2 — Core Business Services
 
@@ -69,4 +70,4 @@ done, in progress, or upcoming.
 
 ---
 
-**Current status:** Step 3 complete. Proceeding to Step 4 (API Gateway).
+**Current status:** Step 4 complete. Proceeding to Step 5 (Authentication Service).

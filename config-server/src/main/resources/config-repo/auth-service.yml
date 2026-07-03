@@ -1,10 +1,9 @@
 # Consumed by auth-service starting Step 5.
 #
-# `security.jwt.secret` is encrypted at rest with the Config Server's
-# `encrypt.key` (see /encrypt endpoint). The server decrypts `{cipher}...`
-# values automatically before serving them to an authenticated client, so
-# auth-service itself only ever sees the plaintext — the ciphertext is what
-# actually lives in this version-controlled file.
+# The JWT signing secret itself lives in the SHARED application.yml (see
+# below) because both auth-service (signs tokens) and api-gateway
+# (verifies tokens) need the exact same value. Only the settings that are
+# specific to *issuing* tokens belong here.
 
 server:
   port: 8083
@@ -24,6 +23,5 @@ spring:
 
 security:
   jwt:
-    secret: '{cipher}63d72dc3ebe8e624aef67257d7e20dc165ce6787e11dc780659c13e66e4d4910591fe7affd1bb99824bbbee8774d0f41ef6b5550020fd723d7ee89d022c75a39f94f8bec5aae5f427b56a17009dced7cf06ef647e86e344c3597fd2a6eefda85'
     access-token-ttl-minutes: 15
     refresh-token-ttl-days: 7
