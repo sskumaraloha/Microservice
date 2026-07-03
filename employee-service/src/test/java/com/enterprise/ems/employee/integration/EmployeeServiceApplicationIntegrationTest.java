@@ -5,9 +5,12 @@ import com.enterprise.ems.employee.dto.EmployeeRequest;
 import com.enterprise.ems.employee.dto.EmployeeResponse;
 import com.enterprise.ems.employee.dto.UpdateStatusRequest;
 import com.enterprise.ems.employee.security.HeaderAuthenticationFilter;
+import com.enterprise.ems.employee.service.DepartmentValidationService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
@@ -34,6 +37,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * through {@code exchange()} with explicit trusted-gateway-header
  * simulation (see {@link #adminHeaders()}) — otherwise every call would
  * silently hit the security filter chain unauthenticated.
+ *
+ * <p>{@link DepartmentValidationService} is mocked here (always
+ * "exists") because this class tests Employee CRUD, not the Department
+ * Service integration itself — that gets its own focused test,
+ * {@code client.DepartmentValidationServiceWireMockTest}, against a real
+ * stubbed HTTP server so the Feign/Resilience4j wiring is exercised for
+ * real rather than mocked away twice.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -41,6 +51,15 @@ class EmployeeServiceApplicationIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @MockBean
+    private DepartmentValidationService departmentValidationService;
+
+    @BeforeEach
+    void stubDepartmentAlwaysExists() {
+        org.mockito.Mockito.when(departmentValidationService.departmentExists(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(true);
+    }
 
     @Test
     void fullCrudLifecycleOverRealHttp() {

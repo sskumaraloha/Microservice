@@ -1,10 +1,13 @@
 package com.enterprise.ems.employee;
 
+import com.enterprise.ems.employee.config.FeignGlobalConfig;
 import com.enterprise.ems.employee.storage.StorageProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
+@EnableFeignClients(defaultConfiguration = FeignGlobalConfig.class)
 @EnableConfigurationProperties(StorageProperties.class)
 @SpringBootApplication
 public class EmployeeServiceApplication {

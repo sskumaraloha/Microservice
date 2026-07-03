@@ -1,13 +1,16 @@
 package com.enterprise.ems.department.integration;
 
+import com.enterprise.ems.department.client.EmployeeHeadcountClient;
 import com.enterprise.ems.department.dto.DepartmentRequest;
 import com.enterprise.ems.department.dto.DepartmentResponse;
 import com.enterprise.ems.department.dto.DepartmentStatisticsResponse;
 import com.enterprise.ems.department.dto.DepartmentTreeNode;
 import com.enterprise.ems.department.security.HeaderAuthenticationFilter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -21,11 +24,18 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * See Employee Service's equivalent class (Step 6) for why every call
  * here goes through {@code exchange()} with explicit headers rather than
  * {@code TestRestTemplate}'s shorthand methods.
+ *
+ * <p>{@link EmployeeHeadcountClient} is mocked: this class tests
+ * Department Service's own CRUD and hierarchy behavior, not its Step 8
+ * cross-service headcount integration (see
+ * {@code EmployeeHeadcountClientWireMockTest} for that).
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -33,6 +43,14 @@ class DepartmentServiceApplicationIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @MockBean
+    private EmployeeHeadcountClient employeeHeadcountClient;
+
+    @BeforeEach
+    void stubHeadcountLookup() {
+        when(employeeHeadcountClient.getHeadcount(any())).thenReturn(0);
+    }
 
     @Test
     void fullCrudLifecycleOverRealHttp() {

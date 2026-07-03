@@ -38,7 +38,8 @@ done, in progress, or upcoming.
 
 ## Phase 3 — Cross-Cutting Concerns
 
-- [ ] Step 8 — Inter-service communication (OpenFeign, WebClient) + Resilience4j
+- [x] **Step 8 — Inter-service communication (OpenFeign, WebClient) + Resilience4j**
+      (`docs/architecture/08-inter-service-communication.md`)
 - [ ] Step 9 — Event-driven architecture (Kafka/RabbitMQ, Outbox Pattern, Saga)
 - [ ] Step 10 — Caching (Redis)
 - [ ] Step 11 — Observability (Zipkin/OpenTelemetry tracing, correlation IDs)
@@ -73,4 +74,4 @@ done, in progress, or upcoming.
 
 ---
 
-**Current status:** Step 7 complete. Proceeding to Step 8 (Inter-service communication: OpenFeign, WebClient, Resilience4j).
+**Current status:** Step 8 complete. Proceeding to Step 9 (Event-driven architecture: Kafka/RabbitMQ, Outbox Pattern, Saga).

@@ -25,3 +25,28 @@ employee:
     allowed-content-types:
       - application/pdf
       - image/png
+
+feign:
+  client:
+    config:
+      department-service:
+        connect-timeout: 1000
+        read-timeout: 1000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      department-service:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 2s
+  retry:
+    instances:
+      department-service:
+        max-attempts: 3
+        wait-duration: 50ms
+  bulkhead:
+    instances:
+      department-service:
+        max-concurrent-calls: 10

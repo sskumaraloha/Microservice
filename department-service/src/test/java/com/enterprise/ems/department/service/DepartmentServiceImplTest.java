@@ -1,5 +1,6 @@
 package com.enterprise.ems.department.service;
 
+import com.enterprise.ems.department.client.EmployeeHeadcountClient;
 import com.enterprise.ems.department.domain.Department;
 import com.enterprise.ems.department.dto.DepartmentRequest;
 import com.enterprise.ems.department.dto.DepartmentResponse;
@@ -31,12 +32,14 @@ class DepartmentServiceImplTest {
 
     private DepartmentRepository departmentRepository;
     private final DepartmentMapper departmentMapper = new DepartmentMapperImpl();
+    private EmployeeHeadcountClient employeeHeadcountClient;
     private DepartmentService departmentService;
 
     @BeforeEach
     void setUp() {
         departmentRepository = mock(DepartmentRepository.class);
-        departmentService = new DepartmentServiceImpl(departmentRepository, departmentMapper);
+        employeeHeadcountClient = mock(EmployeeHeadcountClient.class);
+        departmentService = new DepartmentServiceImpl(departmentRepository, departmentMapper, employeeHeadcountClient);
         when(departmentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
@@ -218,11 +221,26 @@ class DepartmentServiceImplTest {
         when(departmentRepository.findByParentDepartmentId(3L)).thenReturn(List.of());
         when(departmentRepository.findByParentDepartmentId(4L)).thenReturn(List.of());
         when(departmentRepository.findById(1L)).thenReturn(Optional.of(department(1L, null)));
+        when(employeeHeadcountClient.getHeadcount(1L)).thenReturn(7);
 
         var stats = departmentService.getStatistics(1L);
 
         assertThat(stats.directChildrenCount()).isEqualTo(2);
         assertThat(stats.totalDescendantCount()).isEqualTo(3);
         assertThat(stats.depthFromRoot()).isZero();
+        assertThat(stats.employeeHeadcount()).isEqualTo(7);
+    }
+
+    @Test
+    void getStatisticsReportsANullHeadcountWhenEmployeeServiceCannotAnswer() {
+        when(departmentRepository.existsById(1L)).thenReturn(true);
+        when(departmentRepository.countByParentDepartmentId(1L)).thenReturn(0L);
+        when(departmentRepository.findByParentDepartmentId(1L)).thenReturn(List.of());
+        when(departmentRepository.findById(1L)).thenReturn(Optional.of(department(1L, null)));
+        when(employeeHeadcountClient.getHeadcount(1L)).thenReturn(null);
+
+        var stats = departmentService.getStatistics(1L);
+
+        assertThat(stats.employeeHeadcount()).isNull();
     }
 }

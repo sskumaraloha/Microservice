@@ -32,6 +32,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
+    @ExceptionHandler(InvalidDepartmentException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidDepartment(InvalidDepartmentException e) {
+        return build(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(DepartmentServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleDepartmentServiceUnavailable(DepartmentServiceUnavailableException e) {
+        return build(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
         Map<String, String> fieldErrors = new HashMap<>();

@@ -1,5 +1,6 @@
 package com.enterprise.ems.department.service.impl;
 
+import com.enterprise.ems.department.client.EmployeeHeadcountClient;
 import com.enterprise.ems.department.domain.Department;
 import com.enterprise.ems.department.dto.DepartmentRequest;
 import com.enterprise.ems.department.dto.DepartmentResponse;
@@ -29,10 +30,14 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
     private final DepartmentMapper departmentMapper;
+    private final EmployeeHeadcountClient employeeHeadcountClient;
 
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository, DepartmentMapper departmentMapper) {
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository,
+                                  DepartmentMapper departmentMapper,
+                                  EmployeeHeadcountClient employeeHeadcountClient) {
         this.departmentRepository = departmentRepository;
         this.departmentMapper = departmentMapper;
+        this.employeeHeadcountClient = employeeHeadcountClient;
     }
 
     @Override
@@ -119,7 +124,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         int directChildren = (int) departmentRepository.countByParentDepartmentId(id);
         int totalDescendants = countDescendants(id);
         int depth = getAncestors(id).size();
-        return new DepartmentStatisticsResponse(id, directChildren, totalDescendants, depth);
+        Integer headcount = employeeHeadcountClient.getHeadcount(id);
+        return new DepartmentStatisticsResponse(id, directChildren, totalDescendants, depth, headcount);
     }
 
     private DepartmentTreeNode buildTree(Department department) {

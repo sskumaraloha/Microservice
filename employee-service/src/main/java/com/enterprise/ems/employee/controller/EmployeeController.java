@@ -59,6 +59,16 @@ public class EmployeeController {
         return employeeService.search(new EmployeeSearchCriteria(name, email, departmentId, status), pageable);
     }
 
+    @Operation(summary = "Count employees matching optional filters (used by Department Service for headcount statistics, Step 8)")
+    @GetMapping("/count")
+    public long count(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) EmployeeStatus status) {
+        return employeeService.count(new EmployeeSearchCriteria(name, email, departmentId, status));
+    }
+
     @Operation(summary = "Replace an employee's editable fields")
     @PutMapping("/{id}")
     public EmployeeResponse update(@PathVariable Long id, @Valid @RequestBody EmployeeRequest request) {

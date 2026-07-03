@@ -1,16 +1,17 @@
 package com.enterprise.ems.department.dto;
 
 /**
- * Deliberately contains no headcount/employee-count field: that data
- * belongs to Employee Service's database, and computing it correctly
- * (live cross-service call vs. an eventually-consistent local cache)
- * is the subject of Steps 8-9, not this one. What's here is everything
- * this service can answer truthfully using only its own data today.
+ * {@code employeeHeadcount} is nullable by design: it is a live,
+ * best-effort cross-service lookup against Employee Service (Step 8,
+ * {@code EmployeeHeadcountClient}), not data this service owns. A
+ * {@code null} means "Employee Service couldn't answer right now," never
+ * "zero employees" - callers must not conflate the two.
  */
 public record DepartmentStatisticsResponse(
         Long departmentId,
         int directChildrenCount,
         int totalDescendantCount,
-        int depthFromRoot
+        int depthFromRoot,
+        Integer employeeHeadcount
 ) {
 }

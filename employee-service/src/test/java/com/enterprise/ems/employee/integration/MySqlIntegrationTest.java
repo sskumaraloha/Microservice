@@ -3,9 +3,12 @@ package com.enterprise.ems.employee.integration;
 import com.enterprise.ems.employee.dto.EmployeeRequest;
 import com.enterprise.ems.employee.dto.EmployeeResponse;
 import com.enterprise.ems.employee.security.HeaderAuthenticationFilter;
+import com.enterprise.ems.employee.service.DepartmentValidationService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -48,6 +51,15 @@ class MySqlIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @MockBean
+    private DepartmentValidationService departmentValidationService;
+
+    @BeforeEach
+    void stubDepartmentAlwaysExists() {
+        org.mockito.Mockito.when(departmentValidationService.departmentExists(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(true);
+    }
 
     @Test
     void migrationsApplyAndBasicCreateReadWorkAgainstRealMySql() {

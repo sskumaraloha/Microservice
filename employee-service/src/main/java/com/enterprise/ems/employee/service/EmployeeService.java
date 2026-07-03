@@ -15,6 +15,9 @@ public interface EmployeeService {
 
     Page<EmployeeResponse> search(EmployeeSearchCriteria criteria, Pageable pageable);
 
+    /** Same filters as {@link #search}, but only the count — backs Department Service's headcount statistic (Step 8). */
+    long count(EmployeeSearchCriteria criteria);
+
     EmployeeResponse update(Long id, EmployeeRequest request);
 
     EmployeeResponse updateStatus(Long id, EmployeeStatus status);

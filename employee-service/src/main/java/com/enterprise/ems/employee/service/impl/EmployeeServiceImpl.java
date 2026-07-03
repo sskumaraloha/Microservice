@@ -7,8 +7,10 @@ import com.enterprise.ems.employee.dto.EmployeeResponse;
 import com.enterprise.ems.employee.dto.EmployeeSearchCriteria;
 import com.enterprise.ems.employee.exception.DuplicateEmailException;
 import com.enterprise.ems.employee.exception.EmployeeNotFoundException;
+import com.enterprise.ems.employee.exception.InvalidDepartmentException;
 import com.enterprise.ems.employee.mapper.EmployeeMapper;
 import com.enterprise.ems.employee.repository.EmployeeRepository;
+import com.enterprise.ems.employee.service.DepartmentValidationService;
 import com.enterprise.ems.employee.service.EmployeeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,10 +23,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
+    private final DepartmentValidationService departmentValidationService;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeMapper employeeMapper) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository,
+                                EmployeeMapper employeeMapper,
+                                DepartmentValidationService departmentValidationService) {
         this.employeeRepository = employeeRepository;
         this.employeeMapper = employeeMapper;
+        this.departmentValidationService = departmentValidationService;
     }
 
     @Override
@@ -33,6 +39,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employeeRepository.existsByEmail(request.email())) {
             throw new DuplicateEmailException(request.email());
         }
+        requireValidDepartment(request.departmentId());
 
         Employee employee = employeeMapper.toEntity(request);
         return employeeMapper.toResponse(employeeRepository.save(employee));
@@ -50,15 +57,27 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    public long count(EmployeeSearchCriteria criteria) {
+        return employeeRepository.count(EmployeeSpecifications.matching(criteria));
+    }
+
+    @Override
     @Transactional
     public EmployeeResponse update(Long id, EmployeeRequest request) {
         Employee employee = findOrThrow(id);
         if (employeeRepository.existsByEmailAndIdNot(request.email(), id)) {
             throw new DuplicateEmailException(request.email());
         }
+        requireValidDepartment(request.departmentId());
 
         employeeMapper.updateEntityFromRequest(request, employee);
         return employeeMapper.toResponse(employeeRepository.save(employee));
+    }
+
+    private void requireValidDepartment(Long departmentId) {
+        if (!departmentValidationService.departmentExists(departmentId)) {
+            throw new InvalidDepartmentException(departmentId);
+        }
     }
 
     @Override

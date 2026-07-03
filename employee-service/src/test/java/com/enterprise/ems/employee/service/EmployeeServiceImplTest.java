@@ -7,6 +7,7 @@ import com.enterprise.ems.employee.dto.EmployeeResponse;
 import com.enterprise.ems.employee.dto.EmployeeSearchCriteria;
 import com.enterprise.ems.employee.exception.DuplicateEmailException;
 import com.enterprise.ems.employee.exception.EmployeeNotFoundException;
+import com.enterprise.ems.employee.exception.InvalidDepartmentException;
 import com.enterprise.ems.employee.mapper.EmployeeMapper;
 import com.enterprise.ems.employee.mapper.EmployeeMapperImpl;
 import com.enterprise.ems.employee.repository.EmployeeRepository;
@@ -36,14 +37,17 @@ import static org.mockito.Mockito.when;
 class EmployeeServiceImplTest {
 
     private EmployeeRepository employeeRepository;
+    private DepartmentValidationService departmentValidationService;
     private final EmployeeMapper employeeMapper = new EmployeeMapperImpl();
     private EmployeeService employeeService;
 
     @BeforeEach
     void setUp() {
         employeeRepository = mock(EmployeeRepository.class);
-        employeeService = new EmployeeServiceImpl(employeeRepository, employeeMapper);
+        departmentValidationService = mock(DepartmentValidationService.class);
+        employeeService = new EmployeeServiceImpl(employeeRepository, employeeMapper, departmentValidationService);
         when(employeeRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(departmentValidationService.departmentExists(any())).thenReturn(true);
     }
 
     private EmployeeRequest validRequest() {
@@ -68,6 +72,16 @@ class EmployeeServiceImplTest {
 
         assertThatThrownBy(() -> employeeService.create(validRequest()))
                 .isInstanceOf(DuplicateEmailException.class);
+        verify(employeeRepository, never()).save(any());
+    }
+
+    @Test
+    void createRejectsANonExistentDepartmentWithoutSaving() {
+        when(employeeRepository.existsByEmail("ada@example.com")).thenReturn(false);
+        when(departmentValidationService.departmentExists(1L)).thenReturn(false);
+
+        assertThatThrownBy(() -> employeeService.create(validRequest()))
+                .isInstanceOf(InvalidDepartmentException.class);
         verify(employeeRepository, never()).save(any());
     }
 
@@ -113,6 +127,27 @@ class EmployeeServiceImplTest {
                 LocalDate.of(2020, 1, 15));
 
         assertThatThrownBy(() -> employeeService.update(1L, request)).isInstanceOf(DuplicateEmailException.class);
+    }
+
+    @Test
+    void updateRejectsANonExistentDepartment() {
+        Employee employee = employeeWithId(1L);
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+        when(departmentValidationService.departmentExists(2L)).thenReturn(false);
+
+        EmployeeRequest request = new EmployeeRequest("Ada", "Lovelace", "ada@example.com", null, null, 2L,
+                LocalDate.of(2020, 1, 15));
+
+        assertThatThrownBy(() -> employeeService.update(1L, request)).isInstanceOf(InvalidDepartmentException.class);
+    }
+
+    @Test
+    void countDelegatesToTheRepositoryWithASpecification() {
+        when(employeeRepository.count(any(Specification.class))).thenReturn(5L);
+
+        long count = employeeService.count(new EmployeeSearchCriteria(null, null, 1L, null));
+
+        assertThat(count).isEqualTo(5L);
     }
 
     @Test
