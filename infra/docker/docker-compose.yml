@@ -1,0 +1,26 @@
+# Local development infrastructure for the Enterprise Employee Management
+# System. This file grows one block at a time as each course step needs new
+# infrastructure — it intentionally does not reference any application
+# image yet, since no service has been built.
+#
+# Step 2  will add: nothing (Discovery Server needs no external infra)
+# Step 3  will add: nothing (Config Server reads from a Git repo)
+# Step 5  will add: mysql-auth
+# Step 6  will add: mysql-employee
+# Step 7  will add: mysql-department
+# Step 9  will add: kafka, zookeeper
+# Step 10 will add: redis
+# Step 11 will add: zipkin
+# Step 12 will add: prometheus, grafana
+# Step 13 will add: elasticsearch, logstash, kibana
+
+version: "3.9"
+
+networks:
+  ems-network:
+    driver: bridge
+
+volumes:
+  {}
+
+services: {}
