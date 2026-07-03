@@ -29,7 +29,8 @@ done, in progress, or upcoming.
 
 ## Phase 2 — Core Business Services
 
-- [ ] Step 5 — Authentication Service (JWT, refresh tokens, RBAC, OAuth2 Google, OTP)
+- [x] **Step 5 — Authentication Service (JWT, refresh tokens, RBAC, OAuth2 Google, OTP)**
+      (`docs/architecture/05-auth-service.md`)
 - [ ] Step 6 — Employee Service (CRUD, search, pagination, documents)
 - [ ] Step 7 — Department Service (hierarchy, statistics, employee assignment)
 
@@ -70,4 +71,4 @@ done, in progress, or upcoming.
 
 ---
 
-**Current status:** Step 4 complete. Proceeding to Step 5 (Authentication Service).
+**Current status:** Step 5 complete. Proceeding to Step 6 (Employee Service).

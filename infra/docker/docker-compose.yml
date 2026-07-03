@@ -2,7 +2,6 @@
 # This file grows one block at a time as each course step adds a service or
 # a piece of infrastructure.
 #
-# Step 5  will add: auth-service, mysql-auth
 # Step 6  will add: mysql-employee
 # Step 7  will add: mysql-department
 # Step 9  will add: kafka, zookeeper
@@ -19,6 +18,9 @@ version: "3.9"
 networks:
   ems-network:
     driver: bridge
+
+volumes:
+  mysql-auth-data:
 
 services:
   discovery-server:
@@ -87,6 +89,58 @@ services:
       - ems-network
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  mysql-auth:
+    image: mysql:8.0.36
+    container_name: ems-mysql-auth
+    environment:
+      MYSQL_DATABASE: auth_db
+      MYSQL_USER: auth_service
+      MYSQL_PASSWORD: ${AUTH_DB_PASSWORD:-change-me-in-production}
+      MYSQL_ROOT_PASSWORD: ${AUTH_DB_ROOT_PASSWORD:-change-me-in-production}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-auth-data:/var/lib/mysql
+    networks:
+      - ems-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${AUTH_DB_ROOT_PASSWORD:-change-me-in-production}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  auth-service:
+    build:
+      context: ../..
+      dockerfile: auth-service/Dockerfile
+    container_name: ems-auth-service
+    ports:
+      - "8083:8083"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      CONFIG_SERVER_USERNAME: ${CONFIG_SERVER_USERNAME:-config-admin}
+      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD:-change-me-in-production}
+      EUREKA_USERNAME: ${EUREKA_SERVER_USERNAME:-eureka-admin}
+      EUREKA_PASSWORD: ${EUREKA_SERVER_PASSWORD:-change-me-in-production}
+      EUREKA_HOST: discovery-server
+      DB_HOST: mysql-auth
+      DB_USERNAME: auth_service
+      DB_PASSWORD: ${AUTH_DB_PASSWORD:-change-me-in-production}
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql-auth:
+        condition: service_healthy
+    networks:
+      - ems-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8083/actuator/health"]
       interval: 30s
       timeout: 5s
       retries: 3

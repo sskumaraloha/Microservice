@@ -31,11 +31,11 @@
         <testcontainers.version>1.20.2</testcontainers.version>
         <jjwt.version>0.12.7</jjwt.version>
         <resilience4j.version>2.2.0</resilience4j.version>
+        <springdoc.version>2.6.0</springdoc.version>
     </properties>
 
     <!--
         Each course step adds exactly one module here, e.g.:
-            <module>auth-service</module>
             <module>employee-service</module>
             <module>department-service</module>
     -->
@@ -43,6 +43,7 @@
         <module>discovery-server</module>
         <module>config-server</module>
         <module>api-gateway</module>
+        <module>auth-service</module>
     </modules>
 
     <dependencyManagement>
@@ -81,6 +82,22 @@
                 <version>${resilience4j.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

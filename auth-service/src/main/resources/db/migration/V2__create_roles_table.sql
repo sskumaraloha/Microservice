@@ -1,0 +1,7 @@
+CREATE TABLE roles (
+    id   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    CONSTRAINT uq_roles_name UNIQUE (name)
+);
+
+INSERT INTO roles (name) VALUES ('ADMIN'), ('MANAGER'), ('EMPLOYEE');
