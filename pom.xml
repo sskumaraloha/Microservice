@@ -36,7 +36,6 @@
 
     <!--
         Each course step adds exactly one module here, e.g.:
-            <module>employee-service</module>
             <module>department-service</module>
     -->
     <modules>
@@ -44,6 +43,7 @@
         <module>config-server</module>
         <module>api-gateway</module>
         <module>auth-service</module>
+        <module>employee-service</module>
     </modules>
 
     <dependencyManagement>
@@ -122,6 +122,12 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
                         <release>${java.version}</release>
+                        <!-- Without this, Spring MVC can't recover parameter
+                             names for @PathVariable/@RequestParam via
+                             reflection unless every one is given an explicit
+                             name — spring-boot-starter-parent sets this by
+                             default, but this project doesn't inherit from it. -->
+                        <parameters>true</parameters>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>org.projectlombok</groupId>

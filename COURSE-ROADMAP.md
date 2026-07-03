@@ -31,7 +31,8 @@ done, in progress, or upcoming.
 
 - [x] **Step 5 — Authentication Service (JWT, refresh tokens, RBAC, OAuth2 Google, OTP)**
       (`docs/architecture/05-auth-service.md`)
-- [ ] Step 6 — Employee Service (CRUD, search, pagination, documents)
+- [x] **Step 6 — Employee Service (CRUD, search, pagination, documents)**
+      (`docs/architecture/06-employee-service.md`)
 - [ ] Step 7 — Department Service (hierarchy, statistics, employee assignment)
 
 ## Phase 3 — Cross-Cutting Concerns
@@ -71,4 +72,4 @@ done, in progress, or upcoming.
 
 ---
 
-**Current status:** Step 5 complete. Proceeding to Step 6 (Employee Service).
+**Current status:** Step 6 complete. Proceeding to Step 7 (Department Service).

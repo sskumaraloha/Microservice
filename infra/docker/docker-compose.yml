@@ -2,7 +2,6 @@
 # This file grows one block at a time as each course step adds a service or
 # a piece of infrastructure.
 #
-# Step 6  will add: mysql-employee
 # Step 7  will add: mysql-department
 # Step 9  will add: kafka, zookeeper
 # Step 10 will add: redis
@@ -21,6 +20,8 @@ networks:
 
 volumes:
   mysql-auth-data:
+  mysql-employee-data:
+  employee-documents-data:
 
 services:
   discovery-server:
@@ -141,6 +142,61 @@ services:
       - ems-network
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  mysql-employee:
+    image: mysql:8.0.36
+    container_name: ems-mysql-employee
+    environment:
+      MYSQL_DATABASE: employee_db
+      MYSQL_USER: employee_service
+      MYSQL_PASSWORD: ${EMPLOYEE_DB_PASSWORD:-change-me-in-production}
+      MYSQL_ROOT_PASSWORD: ${EMPLOYEE_DB_ROOT_PASSWORD:-change-me-in-production}
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-employee-data:/var/lib/mysql
+    networks:
+      - ems-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${EMPLOYEE_DB_ROOT_PASSWORD:-change-me-in-production}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  employee-service:
+    build:
+      context: ../..
+      dockerfile: employee-service/Dockerfile
+    container_name: ems-employee-service
+    ports:
+      - "8081:8081"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      CONFIG_SERVER_USERNAME: ${CONFIG_SERVER_USERNAME:-config-admin}
+      CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD:-change-me-in-production}
+      EUREKA_USERNAME: ${EUREKA_SERVER_USERNAME:-eureka-admin}
+      EUREKA_PASSWORD: ${EUREKA_SERVER_PASSWORD:-change-me-in-production}
+      EUREKA_HOST: discovery-server
+      DB_HOST: mysql-employee
+      DB_USERNAME: employee_service
+      DB_PASSWORD: ${EMPLOYEE_DB_PASSWORD:-change-me-in-production}
+      EMPLOYEE_DOCUMENTS_DIR: /var/lib/ems/employee-documents
+    volumes:
+      - employee-documents-data:/var/lib/ems/employee-documents
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql-employee:
+        condition: service_healthy
+    networks:
+      - ems-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
       interval: 30s
       timeout: 5s
       retries: 3

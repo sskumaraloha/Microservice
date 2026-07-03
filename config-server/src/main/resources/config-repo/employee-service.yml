@@ -1,5 +1,4 @@
-# Consumed by employee-service starting Step 6. Kept here now so the whole
-# platform's configuration is visible in one place from Step 3 onward.
+# Consumed by employee-service starting Step 6.
 
 server:
   port: 8081
@@ -16,3 +15,14 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+employee:
+  documents:
+    root-directory: ${EMPLOYEE_DOCUMENTS_DIR:/var/lib/ems/employee-documents}
+    max-file-size-bytes: 5242880 # 5 MB
+    allowed-content-types:
+      - application/pdf
+      - image/png
+      - image/jpeg
+      - application/msword
+      - application/vnd.openxmlformats-officedocument.wordprocessingml.document

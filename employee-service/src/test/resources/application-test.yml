@@ -1,0 +1,27 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+  datasource:
+    url: jdbc:h2:mem:employeedb-${random.uuid};MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+eureka:
+  client:
+    enabled: false
+
+employee:
+  documents:
+    root-directory: ./target/test-employee-documents-${random.uuid}
+    max-file-size-bytes: 1048576
+    allowed-content-types:
+      - application/pdf
+      - image/png
