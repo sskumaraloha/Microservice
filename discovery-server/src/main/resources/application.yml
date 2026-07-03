@@ -1,0 +1,99 @@
+# =============================================================================
+# Discovery Server — Eureka
+#
+# Default profile = STANDALONE mode: fine for local development, but a single
+# point of failure in production. The `peer1` / `peer2` profiles below turn
+# this same jar into a two-node, peer-aware Eureka cluster (Step 20 wires
+# these into separate Kubernetes pods behind a headless Service).
+# =============================================================================
+
+server:
+  port: 8761
+
+spring:
+  application:
+    name: discovery-server
+  security:
+    user:
+      # Overridden via env vars in every real environment. Step 3 (Config
+      # Server) moves this to centrally-managed, environment-specific
+      # configuration; Step 20 moves the production value into a Kubernetes
+      # Secret. The defaults below exist only so `mvn spring-boot:run` works
+      # out of the box on a laptop.
+      name: ${EUREKA_SERVER_USERNAME:eureka-admin}
+      password: ${EUREKA_SERVER_PASSWORD:change-me-in-production}
+
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+  client:
+    # Standalone: this node is the registry, it doesn't need to register
+    # with or fetch a registry from itself.
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    # Self-preservation stops Eureka from evicting instances during a
+    # network partition, trading "possibly stale registry" for "definitely
+    # not mass-evicting healthy instances because of a blip." Never disable
+    # this in production; disable it only for local single-node testing
+    # where a stale registry would otherwise mislead you during development.
+    enable-self-preservation: true
+    renewal-percent-threshold: 0.85
+    eviction-interval-timer-in-ms: 60000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+logging:
+  level:
+    com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
+
+---
+# -----------------------------------------------------------------------------
+# Peer 1 of a 2-node HA cluster. Each node registers itself as a client of the
+# OTHER node, so both nodes replicate their registries to each other and a
+# client can query either one and see the full picture.
+# -----------------------------------------------------------------------------
+spring:
+  config:
+    activate:
+      on-profile: peer1
+
+eureka:
+  instance:
+    hostname: peer1
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@peer2:8761/eureka/
+
+---
+spring:
+  config:
+    activate:
+      on-profile: peer2
+
+eureka:
+  instance:
+    hostname: peer2
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@peer1:8761/eureka/

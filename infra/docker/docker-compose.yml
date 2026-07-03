@@ -1,11 +1,10 @@
-# Local development infrastructure for the Enterprise Employee Management
-# System. This file grows one block at a time as each course step needs new
-# infrastructure — it intentionally does not reference any application
-# image yet, since no service has been built.
+# Local development stack for the Enterprise Employee Management System.
+# This file grows one block at a time as each course step adds a service or
+# a piece of infrastructure.
 #
-# Step 2  will add: nothing (Discovery Server needs no external infra)
-# Step 3  will add: nothing (Config Server reads from a Git repo)
-# Step 5  will add: mysql-auth
+# Step 3  will add: config-server
+# Step 4  will add: api-gateway
+# Step 5  will add: auth-service, mysql-auth
 # Step 6  will add: mysql-employee
 # Step 7  will add: mysql-department
 # Step 9  will add: kafka, zookeeper
@@ -13,6 +12,9 @@
 # Step 11 will add: zipkin
 # Step 12 will add: prometheus, grafana
 # Step 13 will add: elasticsearch, logstash, kibana
+#
+# Usage (from the repository root):
+#   docker compose -f infra/docker/docker-compose.yml up --build
 
 version: "3.9"
 
@@ -20,7 +22,22 @@ networks:
   ems-network:
     driver: bridge
 
-volumes:
-  {}
-
-services: {}
+services:
+  discovery-server:
+    build:
+      context: ../..
+      dockerfile: discovery-server/Dockerfile
+    container_name: ems-discovery-server
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_SERVER_USERNAME: ${EUREKA_SERVER_USERNAME:-eureka-admin}
+      EUREKA_SERVER_PASSWORD: ${EUREKA_SERVER_PASSWORD:-change-me-in-production}
+    networks:
+      - ems-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
