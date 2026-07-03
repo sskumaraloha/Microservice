@@ -1,0 +1,13 @@
+eureka:
+  client:
+    enabled: false
+
+spring:
+  security:
+    user:
+      name: test-admin
+      password: test-password
+
+# Intentionally NOT overriding `encrypt.key` here: it must stay equal to the
+# key application.yml's default was encrypted with, so the real `{cipher}`
+# value in config-repo/auth-service.yml decrypts successfully in tests too.

@@ -28,7 +28,7 @@ Lombok.
 | Service | Status | Owns |
 |---|---|---|
 | Discovery Server | **done** (Step 2) | service registry |
-| Config Server | planned (Step 3) | centralized configuration |
+| Config Server | **done** (Step 3) | centralized configuration |
 | API Gateway | planned (Step 4) | routing, auth enforcement, rate limiting |
 | Auth Service | planned (Step 5) | identity, JWT, RBAC, OAuth2 (`auth_db`) |
 | Employee Service | planned (Step 6) | employee data (`employee_db`) |

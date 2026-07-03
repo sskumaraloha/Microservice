@@ -22,7 +22,8 @@ done, in progress, or upcoming.
 
 - [x] **Step 2 — Discovery Server (Eureka)**
       (`docs/architecture/02-discovery-server.md`)
-- [ ] Step 3 — Config Server (centralized configuration)
+- [x] **Step 3 — Config Server (centralized configuration)**
+      (`docs/architecture/03-config-server.md`)
 - [ ] Step 4 — API Gateway (Spring Cloud Gateway, routing, rate limiting)
 
 ## Phase 2 — Core Business Services
@@ -68,5 +69,4 @@ done, in progress, or upcoming.
 
 ---
 
-**Current status:** Step 2 complete. Awaiting confirmation to begin Step 3
-(Config Server).
+**Current status:** Step 3 complete. Proceeding to Step 4 (API Gateway).

@@ -1,0 +1,36 @@
+# Shared defaults applied to EVERY service that imports configuration from
+# this Config Server, regardless of application name. Per-service files
+# (e.g. employee-service.yml) can override any of these values, and
+# per-service-per-profile files (e.g. employee-service-docker.yml) take
+# precedence over both.
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+# %X{traceId}/%X{spanId} are populated once Step 11 (Zipkin/OpenTelemetry)
+# adds distributed tracing; until then they simply print as "-".
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] %-5level %logger{36} - %msg%n"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USERNAME:eureka-admin}:${EUREKA_PASSWORD:change-me-in-production}@${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30

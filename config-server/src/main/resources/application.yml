@@ -1,0 +1,69 @@
+# =============================================================================
+# Config Server's OWN bootstrap configuration (how to run itself), NOT the
+# configuration it serves to other services — that lives in
+# src/main/resources/config-repo/**.
+# =============================================================================
+
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          # `classpath:/config-repo/` bundles the config repo into this
+          # service's own jar, so the whole course stays reproducible on a
+          # fresh clone with zero external setup. A real production
+          # deployment would point this at a mounted volume instead — e.g.
+          # `file:/etc/config-repo` backed by a Kubernetes ConfigMap/Secret,
+          # or (for teams that want git history + PR review on config
+          # changes) switch server.git.uri to a dedicated config repository
+          # entirely separate from application source code.
+          search-locations: ${CONFIG_REPO_LOCATION:classpath:/config-repo/}
+
+  security:
+    user:
+      name: ${CONFIG_SERVER_USERNAME:config-admin}
+      password: ${CONFIG_SERVER_PASSWORD:change-me-in-production}
+
+# Symmetric key used to decrypt any `{cipher}...` value before it is served
+# to a client (see config-repo/auth-service.yml for a real example). Rotate
+# this per environment via CONFIG_ENCRYPT_KEY; never reuse the local default
+# anywhere but a developer's laptop.
+encrypt:
+  key: ${CONFIG_ENCRYPT_KEY:local-development-symmetric-key-change-me}
+
+eureka:
+  client:
+    # Registering the Config Server itself with Eureka is purely for
+    # dashboard visibility/health monitoring. Business services do NOT
+    # discover the Config Server through Eureka — they need their
+    # configuration before they can even start, including the settings
+    # required to register with Eureka, so they are given a fixed,
+    # well-known Config Server URL instead (see each service's
+    # `spring.config.import=configserver:http://...` once Step 5 onward
+    # wires that up). This avoids the chicken-and-egg problem of "which
+    # infrastructure piece must be reachable first."
+    enabled: ${EUREKA_CLIENT_ENABLED:true}
+    service-url:
+      defaultZone: http://${EUREKA_USERNAME:eureka-admin}:${EUREKA_PASSWORD:change-me-in-production}@${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    org.springframework.cloud.config: INFO

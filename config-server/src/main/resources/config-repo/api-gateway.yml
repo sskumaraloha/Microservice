@@ -1,0 +1,4 @@
+# Consumed by api-gateway starting Step 4.
+
+server:
+  port: 8080
